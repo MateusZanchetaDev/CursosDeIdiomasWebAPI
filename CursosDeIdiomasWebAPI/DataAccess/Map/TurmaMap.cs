@@ -10,6 +10,9 @@ namespace CursosDeIdiomasWebAPI.DataAccess.Map
         {
             builder.HasKey(x => x.Codigo);
             builder.Property(x => x.Nivel).IsRequired().HasMaxLength(100);
+            builder.Property(x => x.AlunoCPF).IsRequired(false);
+
+            builder.HasOne(x => x.Aluno);
         }
     }
 }

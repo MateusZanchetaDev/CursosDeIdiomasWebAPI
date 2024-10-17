@@ -28,22 +28,33 @@ namespace CursosDeIdiomasWebAPI.Migrations
                 columns: table => new
                 {
                     Codigo = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Nivel = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Nivel = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    AlunoCPF = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Turmas", x => x.Codigo);
+                    table.ForeignKey(
+                        name: "FK_Turmas_Alunos_AlunoCPF",
+                        column: x => x.AlunoCPF,
+                        principalTable: "Alunos",
+                        principalColumn: "CPF");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Turmas_AlunoCPF",
+                table: "Turmas",
+                column: "AlunoCPF");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Alunos");
+                name: "Turmas");
 
             migrationBuilder.DropTable(
-                name: "Turmas");
+                name: "Alunos");
         }
     }
 }

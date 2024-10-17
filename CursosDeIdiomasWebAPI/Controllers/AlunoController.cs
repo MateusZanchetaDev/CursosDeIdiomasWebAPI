@@ -19,37 +19,31 @@ namespace CursosDeIdiomasWebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Aluno>>> BuscarTodosAlunos()
         {
-            List<Aluno> alunos = await _alunoRepository.BuscarTodosAlunos();
-            return Ok(alunos);
+            return Ok(await _alunoRepository.BuscarTodosAlunos());
         }
 
         [HttpGet("{CPF}")]
         public async Task<ActionResult<Aluno>> BuscarPorCPF(string CPF)
         {
-            Aluno aluno = await _alunoRepository.BuscarPorCPF(CPF);
-            return Ok(aluno);
+            return Ok(await _alunoRepository.BuscarPorCPF(CPF));
         }
 
         [HttpPost]
         public async Task<ActionResult<Aluno>> Cadastrar([FromBody]Aluno aluno)
         {
-            Aluno alunoAdicionado = await _alunoRepository.Adicionar(aluno);
-            return Ok(alunoAdicionado);
+            return Ok(await _alunoRepository.Adicionar(aluno));
         }
 
         [HttpPut("{CPF}")]
         public async Task<ActionResult<Aluno>> Atualizar([FromBody] Aluno aluno, string CPF)
         {
-            aluno.CPF = CPF;
-            Aluno alunoAtualizado = await _alunoRepository.Atualizar(aluno, CPF);
-            return Ok(alunoAtualizado);
+            return Ok(await _alunoRepository.Atualizar(aluno, aluno.CPF = CPF));
         }
 
         [HttpDelete("{CPF}")]
         public async Task<ActionResult<Aluno>> Apagar(string CPF)
         {
-            Aluno alunoAtualizado = await _alunoRepository.Apagar(CPF);
-            return Ok(alunoAtualizado);
+            return Ok(await _alunoRepository.Apagar(CPF));
         }
     }
 }

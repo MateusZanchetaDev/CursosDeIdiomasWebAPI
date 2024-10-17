@@ -45,6 +45,9 @@ namespace CursosDeIdiomasWebAPI.Migrations
                     b.Property<string>("Codigo")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("AlunoCPF")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Nivel")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -52,7 +55,18 @@ namespace CursosDeIdiomasWebAPI.Migrations
 
                     b.HasKey("Codigo");
 
+                    b.HasIndex("AlunoCPF");
+
                     b.ToTable("Turmas");
+                });
+
+            modelBuilder.Entity("CursosDeIdiomasWebAPI.Models.Turma", b =>
+                {
+                    b.HasOne("CursosDeIdiomasWebAPI.Models.Aluno", "Aluno")
+                        .WithMany()
+                        .HasForeignKey("AlunoCPF");
+
+                    b.Navigation("Aluno");
                 });
 #pragma warning restore 612, 618
         }
