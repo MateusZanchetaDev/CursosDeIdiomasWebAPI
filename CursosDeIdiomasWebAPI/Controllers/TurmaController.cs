@@ -35,12 +35,6 @@ namespace CursosDeIdiomasWebAPI.Controllers
             return Ok(await _turmaRepository.Adicionar(turma));
         }
 
-        [HttpPut("{Codigo}")]
-        public async Task<ActionResult<Turma>> Atualizar([FromBody] Turma turma, string Codigo)
-        {
-            return Ok(await _turmaRepository.Atualizar(turma, turma.Codigo = Codigo));
-        }
-
         [HttpDelete("{Codigo}")]
         public async Task<ActionResult<Turma>> Apagar(string Codigo)
         {

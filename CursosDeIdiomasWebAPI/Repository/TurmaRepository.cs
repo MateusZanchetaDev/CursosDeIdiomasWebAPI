@@ -32,25 +32,6 @@ namespace CursosDeIdiomasWebAPI.Repository
             return turma;
         }
 
-        public async Task<Turma> Atualizar(Turma turma, string Codigo)
-        {
-            Turma turmaPorCodigo = await BuscarPorCodigo(Codigo);
-
-            if (turmaPorCodigo == null)
-            {
-                throw new Exception($"Turma para o Código: {Codigo} não foi encontrado no banco de dados.");
-            }
-
-            turmaPorCodigo.Codigo = turma.Codigo;
-            turmaPorCodigo.Nivel = turma.Nivel;
-            turmaPorCodigo.AlunoCPF = turma.AlunoCPF;
-
-            _dbContext.Turmas.Update(turmaPorCodigo);
-            await _dbContext.SaveChangesAsync();
-
-            return turmaPorCodigo;
-        }
-
         public async Task<Turma> Apagar(string Codigo)
         {
             Turma turmaPorCodigo = await BuscarPorCodigo(Codigo);
