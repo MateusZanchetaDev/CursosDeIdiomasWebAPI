@@ -25,6 +25,13 @@ namespace CursosDeIdiomasWebAPI.Repository
 
         public async Task<Aluno> Adicionar(Aluno aluno)
         {
+            Aluno encontrarAluno = await BuscarPorCPF(aluno.CPF);
+
+            if (encontrarAluno != null && encontrarAluno.CPF == aluno.CPF)
+            {
+                throw new Exception($"O Aluno do CPF: {aluno.CPF} já existe no banco de dados.");
+            }
+
             await _dbContext.Alunos.AddAsync(aluno);
             await _dbContext.SaveChangesAsync();
 
