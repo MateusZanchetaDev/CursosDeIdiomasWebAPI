@@ -70,7 +70,7 @@ namespace CursosDeIdiomasWebAPI.Repository
         public async Task<Aluno> Apagar(string CPF)
         {
             Aluno alunoEncontrado = await BuscarPorCPF(CPF);
-
+    
             if (alunoEncontrado == null)
             {
                 throw new Exception($"Aluno para o CPF: {CPF} não foi encontrado no banco de dados.");

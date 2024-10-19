@@ -40,6 +40,10 @@ namespace CursosDeIdiomasWebAPI.Repository
             {
                 throw new Exception($"Turma para o Código: {Codigo} não foi encontrado no banco de dados.");
             }
+            else if (turmaPorCodigo.listAlunos.Count >= 1)
+            {
+                throw new Exception($"Existe alunos na Turma: {turmaPorCodigo.Codigo} e não pode ser apagada do banco de dados.");
+            }
 
             _dbContext.Turmas.Remove(turmaPorCodigo);
             await _dbContext.SaveChangesAsync();
