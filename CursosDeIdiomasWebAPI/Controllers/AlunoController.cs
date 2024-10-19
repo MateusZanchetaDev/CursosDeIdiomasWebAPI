@@ -22,12 +22,6 @@ namespace CursosDeIdiomasWebAPI.Controllers
             return Ok(await _alunoRepository.BuscarTodosAlunos());
         }
 
-        [HttpGet("{CPF}")]
-        public async Task<ActionResult<Aluno>> BuscarPorCPF(string CPF)
-        {
-            return Ok(await _alunoRepository.BuscarPorCPF(CPF));
-        }
-
         [HttpPost]
         public async Task<ActionResult<Aluno>> Cadastrar([FromBody]Aluno aluno)
         {

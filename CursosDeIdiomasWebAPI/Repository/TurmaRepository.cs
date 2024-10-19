@@ -16,12 +16,12 @@ namespace CursosDeIdiomasWebAPI.Repository
 
         public async Task<Turma> BuscarPorCodigo(string Codigo)
         {
-            return await _dbContext.Turmas.Include(x => x.Aluno).FirstOrDefaultAsync(x => x.Codigo == Codigo);
+            return await _dbContext.Turmas.Include(x => x.listAlunos).FirstOrDefaultAsync(x => x.Codigo == Codigo);
         }
 
         public async Task<List<Turma>> BuscarTodasTurmas()
         {
-          return await _dbContext.Turmas.Include(x => x.Aluno).ToListAsync();
+            return await _dbContext.Turmas.Include(x => x.listAlunos).ToListAsync();
         }
 
         public async Task<Turma> Adicionar(Turma turma)
