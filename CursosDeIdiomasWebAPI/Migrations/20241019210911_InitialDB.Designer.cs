@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CursosDeIdiomasWebAPI.Migrations
 {
     [DbContext(typeof(CursoDeIdiomasDbContext))]
-    [Migration("20241017185512_InitialDB")]
+    [Migration("20241019210911_InitialDB")]
     partial class InitialDB
     {
         /// <inheritdoc />
@@ -29,16 +29,23 @@ namespace CursosDeIdiomasWebAPI.Migrations
                     b.Property<string>("CPF")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("CodigoTurma")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Nome")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.HasKey("CPF");
+
+                    b.HasIndex("CodigoTurma");
 
                     b.ToTable("Alunos");
                 });
@@ -48,9 +55,6 @@ namespace CursosDeIdiomasWebAPI.Migrations
                     b.Property<string>("Codigo")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("AlunoCPF")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Nivel")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -58,18 +62,23 @@ namespace CursosDeIdiomasWebAPI.Migrations
 
                     b.HasKey("Codigo");
 
-                    b.HasIndex("AlunoCPF");
-
                     b.ToTable("Turmas");
+                });
+
+            modelBuilder.Entity("CursosDeIdiomasWebAPI.Models.Aluno", b =>
+                {
+                    b.HasOne("CursosDeIdiomasWebAPI.Models.Turma", "Turma")
+                        .WithMany("listAlunos")
+                        .HasForeignKey("CodigoTurma")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Turma");
                 });
 
             modelBuilder.Entity("CursosDeIdiomasWebAPI.Models.Turma", b =>
                 {
-                    b.HasOne("CursosDeIdiomasWebAPI.Models.Aluno", "Aluno")
-                        .WithMany()
-                        .HasForeignKey("AlunoCPF");
-
-                    b.Navigation("Aluno");
+                    b.Navigation("listAlunos");
                 });
 #pragma warning restore 612, 618
         }

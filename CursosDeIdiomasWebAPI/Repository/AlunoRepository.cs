@@ -26,8 +26,17 @@ namespace CursosDeIdiomasWebAPI.Repository
         public async Task<Aluno> Adicionar(Aluno aluno)
         {
             Aluno encontrarAluno = await BuscarPorCPF(aluno.CPF);
+            Turma encontrarTurma = await _dbContext.Turmas.Include(t => t.listAlunos).FirstOrDefaultAsync(t => t.Codigo == aluno.CodigoTurma);
 
-            if (encontrarAluno != null && encontrarAluno.CPF == aluno.CPF)
+            if (encontrarTurma == null)
+            {
+                throw new Exception($"O aluno precisa informar uma Turma, para finalizar o cadastro. Turma informada: {aluno.CodigoTurma}");
+            }
+            if (encontrarTurma.listAlunos.Count >= 5)
+            {
+                throw new Exception($"A turma só pode ter no máximo 5 alunos. Quantidade de alunos atual: {encontrarTurma.listAlunos.Count}.");
+            }
+            else if (encontrarAluno != null && encontrarAluno.CPF == aluno.CPF)
             {
                 throw new Exception($"O Aluno do CPF: {aluno.CPF} já existe no banco de dados.");
             }
@@ -50,6 +59,7 @@ namespace CursosDeIdiomasWebAPI.Repository
             alunoEncontrado.Nome = aluno.Nome;
             alunoEncontrado.CPF = aluno.CPF;
             alunoEncontrado.Email = aluno.Email;
+            alunoEncontrado.CodigoTurma = aluno.CodigoTurma;
 
             _dbContext.Alunos.Update(alunoEncontrado);
             await _dbContext.SaveChangesAsync();

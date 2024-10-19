@@ -23,6 +23,12 @@ namespace CursosDeIdiomasWebAPI.Controllers
             return Ok(await _turmaRepository.BuscarTodasTurmas());
         }
 
+        [HttpGet("{Codigo}")]
+        public async Task<ActionResult<Turma>> BuscarPorCodigo(string Codigo)
+        {
+            return Ok(await _turmaRepository.BuscarPorCodigo(Codigo));
+        }
+
         [HttpPost]
         public async Task<ActionResult<Turma>> Cadastrar([FromBody] Turma turma)
         {
