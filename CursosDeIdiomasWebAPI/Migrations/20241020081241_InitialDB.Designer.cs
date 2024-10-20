@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CursosDeIdiomasWebAPI.Migrations
 {
     [DbContext(typeof(CursoDeIdiomasDbContext))]
-    [Migration("20241019210911_InitialDB")]
+    [Migration("20241020081241_InitialDB")]
     partial class InitialDB
     {
         /// <inheritdoc />

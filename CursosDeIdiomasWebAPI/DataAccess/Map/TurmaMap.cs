@@ -10,7 +10,7 @@ namespace CursosDeIdiomasWebAPI.DataAccess.Map
         {
             builder.HasKey(x => x.Codigo);
             builder.Property(x => x.Nivel).IsRequired().HasMaxLength(100);
-            builder.HasMany(t => t.listAlunos).WithOne(a => a.Turma).HasForeignKey(a => a.CodigoTurma).OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(t => t.listAlunos).WithMany(a => a.listTurmas).UsingEntity(j => j.ToTable("AlunoTurma"));
         }
     }
 }

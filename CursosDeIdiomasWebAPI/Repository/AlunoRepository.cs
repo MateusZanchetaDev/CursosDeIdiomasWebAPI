@@ -15,7 +15,7 @@ namespace CursosDeIdiomasWebAPI.Repository
 
         public async Task<Aluno> BuscarPorCPF(string CPF)
         {
-            return await _dbContext.Alunos.FirstOrDefaultAsync(x => x.CPF == CPF);
+            return await _dbContext.Alunos.Include(a => a.listTurmas).FirstOrDefaultAsync(a => a.CPF == CPF);
         }
 
         public async Task<List<Aluno>> BuscarTodosAlunos()
@@ -41,10 +41,53 @@ namespace CursosDeIdiomasWebAPI.Repository
                 throw new Exception($"O Aluno do CPF: {aluno.CPF} já existe no banco de dados.");
             }
 
+            aluno.listTurmas.Add(encontrarTurma);
+
             await _dbContext.Alunos.AddAsync(aluno);
             await _dbContext.SaveChangesAsync();
 
             return aluno;
+        }
+
+        public async Task<Aluno> AdicionarAlunoTurma(Aluno aluno)
+        {
+            Turma turmaEncontrada = await _dbContext.Turmas.FirstOrDefaultAsync(t => t.Codigo == aluno.CodigoTurma);
+            if (turmaEncontrada == null)
+            {
+                throw new Exception($"A turma com Código {aluno.CodigoTurma} não foi encontrada.");
+            }
+
+            // Busca o aluno existente pelo CPF
+            Aluno alunoExistente = await BuscarPorCPF(aluno.CPF);
+
+            if (alunoExistente == null)
+            {
+                // Se o aluno não existe, cria um novo
+                aluno.listTurmas.Add(turmaEncontrada); // Adiciona a turma à lista
+                await _dbContext.Alunos.AddAsync(aluno); // Adiciona o novo aluno
+            }
+            else
+            {
+                // Se o aluno já existe, verifica se ele já está na turma
+                if (alunoExistente.CodigoTurma == aluno.CodigoTurma || alunoExistente.listTurmas.Any(t => t.Codigo == aluno.CodigoTurma))
+                {
+                    throw new Exception($"O Aluno do CPF: {aluno.CPF} já está cadastrado na Turma: {aluno.CodigoTurma}.");
+                }
+
+                // Adiciona a nova turma à lista de turmas do aluno existente
+                alunoExistente.listTurmas.Add(turmaEncontrada);
+
+                // Se necessário, atualiza a turma principal do aluno
+                alunoExistente.CodigoTurma = aluno.CodigoTurma;
+
+                // Atualiza o aluno no banco de dados
+                _dbContext.Alunos.Update(alunoExistente);
+            }
+
+            // Salva as alterações no banco de dados
+            await _dbContext.SaveChangesAsync();
+
+            return alunoExistente ?? aluno;
         }
 
         public async Task<Aluno> Atualizar(Aluno aluno, string CPF)
