@@ -7,7 +7,6 @@ namespace CursosDeIdiomasWebAPI.Models
         public string Nome { get; set; }
         public string CPF { get; set; }
         public string Email { get; set; }
-        public string CodigoTurma { get; set; }
         [JsonIgnore] public List<Turma>? listTurmas { get; set; } = new();
     }
 }

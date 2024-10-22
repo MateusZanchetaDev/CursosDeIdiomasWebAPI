@@ -12,7 +12,6 @@ namespace CursosDeIdiomasWebAPI.DataAccess.Map
             builder.HasKey(x => x.CPF);
             builder.Property(x => x.Nome).IsRequired().HasMaxLength(255);
             builder.Property(x => x.Email).IsRequired().HasMaxLength(150);
-            builder.Property(x => x.CodigoTurma).IsRequired();
             builder.HasMany(a => a.listTurmas).WithMany(t => t.listAlunos).UsingEntity(j => j.ToTable("AlunoTurma"));
         }
     }

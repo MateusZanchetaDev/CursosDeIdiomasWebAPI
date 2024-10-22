@@ -25,69 +25,78 @@ namespace CursosDeIdiomasWebAPI.Repository
 
         public async Task<Aluno> Adicionar(Aluno aluno)
         {
+            // Verifica se o aluno já existe pelo CPF
             Aluno encontrarAluno = await BuscarPorCPF(aluno.CPF);
-            Turma encontrarTurma = await _dbContext.Turmas.Include(t => t.listAlunos).FirstOrDefaultAsync(t => t.Codigo == aluno.CodigoTurma);
 
-            if (encontrarTurma == null)
-            {
-                throw new Exception($"O aluno precisa informar uma Turma, para finalizar o cadastro. Turma informada: {aluno.CodigoTurma}");
-            }
-            if (encontrarTurma.listAlunos.Count >= 5)
-            {
-                throw new Exception($"A turma só pode ter no máximo 5 alunos. Quantidade de alunos atual: {encontrarTurma.listAlunos.Count}.");
-            }
-            else if (encontrarAluno != null && encontrarAluno.CPF == aluno.CPF)
+            // Se o aluno já existe, lança uma exceção
+            if (encontrarAluno != null)
             {
                 throw new Exception($"O Aluno do CPF: {aluno.CPF} já existe no banco de dados.");
             }
 
-            aluno.listTurmas.Add(encontrarTurma);
+            // Obtém as turmas válidas (aquelas que existem e têm menos de 5 alunos)
+            var turmasValidas = new List<Turma>();
+            foreach (var codigoTurma in aluno.listTurmas.Select(t => t.Codigo))
+            {
+                var encontrarTurma = await _dbContext.Turmas.Include(t => t.listAlunos)
+                    .FirstOrDefaultAsync(t => t.Codigo == codigoTurma);
 
+                if (encontrarTurma == null)
+                {
+                    throw new Exception($"A turma com Código {codigoTurma} não foi encontrada.");
+                }
+
+                if (encontrarTurma.listAlunos.Count >= 5)
+                {
+                    throw new Exception($"A turma {codigoTurma} só pode ter no máximo 5 alunos. Quantidade atual: {encontrarTurma.listAlunos.Count}.");
+                }
+
+                turmasValidas.Add(encontrarTurma);
+            }
+
+            // Adiciona as turmas válidas ao aluno
+            aluno.listTurmas.AddRange(turmasValidas);
+
+            // Adiciona o aluno no banco de dados
             await _dbContext.Alunos.AddAsync(aluno);
             await _dbContext.SaveChangesAsync();
 
             return aluno;
         }
 
-        public async Task<Aluno> AdicionarAlunoTurma(Aluno aluno)
+        public async Task<Aluno> AdicionarAlunoTurma(string CPF, string CodigoTurmaInformado)
         {
-            Turma turmaEncontrada = await _dbContext.Turmas.FirstOrDefaultAsync(t => t.Codigo == aluno.CodigoTurma);
-            if (turmaEncontrada == null)
-            {
-                throw new Exception($"A turma com Código {aluno.CodigoTurma} não foi encontrada.");
-            }
-
             // Busca o aluno existente pelo CPF
-            Aluno alunoExistente = await BuscarPorCPF(aluno.CPF);
+            Aluno alunoExistente = await BuscarPorCPF(CPF);
 
             if (alunoExistente == null)
             {
-                // Se o aluno não existe, cria um novo
-                aluno.listTurmas.Add(turmaEncontrada); // Adiciona a turma à lista
-                await _dbContext.Alunos.AddAsync(aluno); // Adiciona o novo aluno
+                throw new Exception($"Aluno com o CPF {CPF} não encontrado.");
             }
-            else
+
+            foreach (var codigoTurma in CodigoTurmaInformado)
             {
-                // Se o aluno já existe, verifica se ele já está na turma
-                if (alunoExistente.CodigoTurma == aluno.CodigoTurma || alunoExistente.listTurmas.Any(t => t.Codigo == aluno.CodigoTurma))
+                // Busca a turma pelo código
+                Turma turmaEncontrada = await _dbContext.Turmas.FirstOrDefaultAsync(t => t.Codigo == CodigoTurmaInformado);
+
+                if (turmaEncontrada == null)
                 {
-                    throw new Exception($"O Aluno do CPF: {aluno.CPF} já está cadastrado na Turma: {aluno.CodigoTurma}.");
+                    throw new Exception($"A turma com Código {codigoTurma} não foi encontrada.");
                 }
 
-                // Adiciona a nova turma à lista de turmas do aluno existente
-                alunoExistente.listTurmas.Add(turmaEncontrada);
-
-                // Se necessário, atualiza a turma principal do aluno
-                alunoExistente.CodigoTurma = aluno.CodigoTurma;
-
-                // Atualiza o aluno no banco de dados
-                _dbContext.Alunos.Update(alunoExistente);
+                // Verifica se o aluno já está na turma
+                if (!alunoExistente.listTurmas.Any(t => t.Codigo == CodigoTurmaInformado))
+                {
+                    // Adiciona a turma à lista de turmas do aluno
+                    alunoExistente.listTurmas.Add(turmaEncontrada);
+                }
             }
 
-            // Salva as alterações no banco de dados
+            // Atualiza o aluno no banco de dados
+            _dbContext.Alunos.Update(alunoExistente);
             await _dbContext.SaveChangesAsync();
 
-            return alunoExistente ?? aluno;
+            return alunoExistente;
         }
 
         public async Task<Aluno> Atualizar(Aluno aluno, string CPF)
@@ -102,7 +111,7 @@ namespace CursosDeIdiomasWebAPI.Repository
             alunoEncontrado.Nome = aluno.Nome;
             alunoEncontrado.CPF = aluno.CPF;
             alunoEncontrado.Email = aluno.Email;
-            alunoEncontrado.CodigoTurma = aluno.CodigoTurma;
+            //alunoEncontrado.CodigoTurma = aluno.CodigoTurma;
 
             _dbContext.Alunos.Update(alunoEncontrado);
             await _dbContext.SaveChangesAsync();
