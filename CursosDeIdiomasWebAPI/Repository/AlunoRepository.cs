@@ -25,39 +25,26 @@ namespace CursosDeIdiomasWebAPI.Repository
 
         public async Task<Aluno> Adicionar(Aluno aluno)
         {
-            // Verifica se o aluno já existe pelo CPF
             Aluno encontrarAluno = await BuscarPorCPF(aluno.CPF);
 
-            // Se o aluno já existe, lança uma exceção
             if (encontrarAluno != null)
             {
                 throw new Exception($"O Aluno do CPF: {aluno.CPF} já existe no banco de dados.");
             }
 
-            // Obtém as turmas válidas (aquelas que existem e têm menos de 5 alunos)
             var turmasValidas = new List<Turma>();
+
             foreach (var codigoTurma in aluno.listTurmas.Select(t => t.Codigo))
             {
-                var encontrarTurma = await _dbContext.Turmas.Include(t => t.listAlunos)
-                    .FirstOrDefaultAsync(t => t.Codigo == codigoTurma);
+                var encontrarTurma = await _dbContext.Turmas.Include(t => t.listAlunos).FirstOrDefaultAsync(t => t.Codigo == codigoTurma);
 
-                if (encontrarTurma == null)
-                {
-                    throw new Exception($"A turma com Código {codigoTurma} não foi encontrada.");
-                }
-
-                if (encontrarTurma.listAlunos.Count >= 5)
-                {
-                    throw new Exception($"A turma {codigoTurma} só pode ter no máximo 5 alunos. Quantidade atual: {encontrarTurma.listAlunos.Count}.");
-                }
+                ValidaQuantidadeAlunosEmTurma(encontrarTurma, codigoTurma);
 
                 turmasValidas.Add(encontrarTurma);
             }
 
-            // Adiciona as turmas válidas ao aluno
             aluno.listTurmas.AddRange(turmasValidas);
 
-            // Adiciona o aluno no banco de dados
             await _dbContext.Alunos.AddAsync(aluno);
             await _dbContext.SaveChangesAsync();
 
@@ -66,7 +53,6 @@ namespace CursosDeIdiomasWebAPI.Repository
 
         public async Task<Aluno> AdicionarAlunoTurma(string CPF, string CodigoTurmaInformado)
         {
-            // Busca o aluno existente pelo CPF
             Aluno alunoExistente = await BuscarPorCPF(CPF);
 
             if (alunoExistente == null)
@@ -76,23 +62,24 @@ namespace CursosDeIdiomasWebAPI.Repository
 
             foreach (var codigoTurma in CodigoTurmaInformado)
             {
-                // Busca a turma pelo código
-                Turma turmaEncontrada = await _dbContext.Turmas.FirstOrDefaultAsync(t => t.Codigo == CodigoTurmaInformado);
+                Turma turmaEncontrada = await _dbContext.Turmas.Include(t => t.listAlunos).FirstOrDefaultAsync(t => t.Codigo == CodigoTurmaInformado);
 
                 if (turmaEncontrada == null)
                 {
-                    throw new Exception($"A turma com Código {codigoTurma} não foi encontrada.");
+                    throw new Exception($"A turma com Código: {CodigoTurmaInformado} não foi encontrada.");
                 }
 
-                // Verifica se o aluno já está na turma
-                if (!alunoExistente.listTurmas.Any(t => t.Codigo == CodigoTurmaInformado))
+                ValidaQuantidadeAlunosEmTurma(turmaEncontrada, CodigoTurmaInformado);
+
+                if (alunoExistente.listTurmas.Any(t => t.Codigo == CodigoTurmaInformado))
                 {
-                    // Adiciona a turma à lista de turmas do aluno
-                    alunoExistente.listTurmas.Add(turmaEncontrada);
+                    throw new Exception($"O aluno: {alunoExistente.CPF}, já está na turma: {CodigoTurmaInformado}.");
                 }
+
+                alunoExistente.listTurmas.Add(turmaEncontrada);
+                break;
             }
 
-            // Atualiza o aluno no banco de dados
             _dbContext.Alunos.Update(alunoExistente);
             await _dbContext.SaveChangesAsync();
 
@@ -111,7 +98,6 @@ namespace CursosDeIdiomasWebAPI.Repository
             alunoEncontrado.Nome = aluno.Nome;
             alunoEncontrado.CPF = aluno.CPF;
             alunoEncontrado.Email = aluno.Email;
-            //alunoEncontrado.CodigoTurma = aluno.CodigoTurma;
 
             _dbContext.Alunos.Update(alunoEncontrado);
             await _dbContext.SaveChangesAsync();
@@ -132,6 +118,14 @@ namespace CursosDeIdiomasWebAPI.Repository
             await _dbContext.SaveChangesAsync();
 
             return alunoEncontrado;
+        }
+
+        public void ValidaQuantidadeAlunosEmTurma(Turma turmaInformada, string codigoTurma)
+        {
+            if (turmaInformada.listAlunos.Count >= 5)
+            {
+                throw new Exception($"A turma {codigoTurma} só pode ter no máximo 5 alunos. Quantidade atual: {turmaInformada.listAlunos.Count}.");
+            }
         }
     }
 }

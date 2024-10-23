@@ -26,6 +26,21 @@ namespace CursosDeIdiomasWebAPI.Controllers
             return Ok(await _alunoRepository.BuscarTodosAlunos());
         }
 
+        [HttpPost("{CodigoTurma}")]
+        public async Task<ActionResult<Aluno>> Cadastrar(string CodigoTurma, [FromBody] Aluno aluno)
+        {
+            Turma turmaEncontrada = await _dbContext.Turmas.FirstOrDefaultAsync(t => t.Codigo == CodigoTurma);
+
+            if (turmaEncontrada == null)
+            {
+                return BadRequest($"A turma com Código: {CodigoTurma} não foi encontrada.");
+            }
+
+            aluno.listTurmas = new List<Turma> { turmaEncontrada };
+
+            return Ok(await _alunoRepository.Adicionar(aluno));
+        }
+
         [HttpPost("{CPF}/{CodigoTurma}")]
         public async Task<ActionResult<Aluno>> CadastrarAlunoTurma(string CPF, string CodigoTurma)
         {
@@ -36,35 +51,6 @@ namespace CursosDeIdiomasWebAPI.Controllers
         public async Task<ActionResult<Aluno>> BuscarPorCPF(string CPF)
         {
             return Ok(await _alunoRepository.BuscarPorCPF(CPF));
-        }
-
-        [HttpPost("{CodigoTurma}")]
-        public async Task<ActionResult<Aluno>> Cadastrar(string CodigoTurma, [FromBody] Aluno aluno)
-        {
-            // Verifica se o objeto Aluno está nulo
-            if (aluno == null)
-            {
-                return BadRequest("O objeto Aluno não pode ser nulo.");
-            }
-
-            // Verifica se o CPF do aluno é nulo ou vazio
-            if (string.IsNullOrEmpty(aluno.CPF))
-            {
-                return BadRequest("O CPF do aluno é obrigatório.");
-            }
-
-            // Adiciona a turma correspondente ao código recebido
-            Turma turmaEncontrada = await _dbContext.Turmas.FirstOrDefaultAsync(t => t.Codigo == CodigoTurma);
-
-            if (turmaEncontrada == null)
-            {
-                return BadRequest($"A turma com o código {CodigoTurma} não foi encontrada.");
-            }
-
-            // Adiciona a turma à lista de turmas do aluno
-            aluno.listTurmas = new List<Turma> { turmaEncontrada };
-
-            return Ok(await _alunoRepository.Adicionar(aluno));
         }
 
         [HttpPut("{CPF}")]
