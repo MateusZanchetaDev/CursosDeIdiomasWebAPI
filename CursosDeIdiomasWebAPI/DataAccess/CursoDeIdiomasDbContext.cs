@@ -6,10 +6,7 @@ namespace CursosDeIdiomasWebAPI.DataAccess
 {
     public class CursoDeIdiomasDbContext : DbContext
     {
-        public CursoDeIdiomasDbContext(DbContextOptions<CursoDeIdiomasDbContext> options) : base(options)
-        {
-
-        }
+        public CursoDeIdiomasDbContext(DbContextOptions<CursoDeIdiomasDbContext> options) : base(options){}
 
         public DbSet<Aluno> Alunos { get; set; }
         public DbSet<Turma> Turmas { get; set; }

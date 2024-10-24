@@ -12,12 +12,10 @@ namespace CursosDeIdiomasWebAPI.Controllers
     public class AlunoController : ControllerBase
     {
         private readonly IAlunoRepository _alunoRepository;
-        private readonly CursoDeIdiomasDbContext _dbContext;
 
-        public AlunoController(CursoDeIdiomasDbContext cursoDeIdiomasDbContext, IAlunoRepository alunoRepository)
+        public AlunoController(IAlunoRepository alunoRepository)
         {
             _alunoRepository = alunoRepository;
-            _dbContext = cursoDeIdiomasDbContext;
         }
 
         [HttpGet]
@@ -29,16 +27,7 @@ namespace CursosDeIdiomasWebAPI.Controllers
         [HttpPost("{CodigoTurma}")]
         public async Task<ActionResult<Aluno>> Cadastrar(string CodigoTurma, [FromBody] Aluno aluno)
         {
-            Turma turmaEncontrada = await _dbContext.Turmas.FirstOrDefaultAsync(t => t.Codigo == CodigoTurma);
-
-            if (turmaEncontrada == null)
-            {
-                return BadRequest($"A turma com Código: {CodigoTurma} não foi encontrada.");
-            }
-
-            aluno.listTurmas = new List<Turma> { turmaEncontrada };
-
-            return Ok(await _alunoRepository.Adicionar(aluno));
+            return Ok(await _alunoRepository.Adicionar(CodigoTurma, aluno));
         }
 
         [HttpPost("{CPF}/{CodigoTurma}")]
