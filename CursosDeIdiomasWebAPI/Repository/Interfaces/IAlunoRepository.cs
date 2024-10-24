@@ -8,7 +8,7 @@ namespace CursosDeIdiomasWebAPI.Repository.Interfaces
         Task<Aluno> BuscarPorCPF(string CPF);
         Task<Aluno> Adicionar(Aluno aluno);
         Task<Aluno> AdicionarAlunoTurma(string CPF, string CodigoTurmaInformado);
-        Task<Aluno> Atualizar(Aluno aluno, string CPF);
+        Task<Aluno> Atualizar(string Nome, string CPF, string Email);
         Task<Aluno> Apagar(string CPF);
     }
 }

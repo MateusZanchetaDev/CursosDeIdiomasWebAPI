@@ -55,10 +55,7 @@ namespace CursosDeIdiomasWebAPI.Repository
         {
             Aluno alunoExistente = await BuscarPorCPF(CPF);
 
-            if (alunoExistente == null)
-            {
-                throw new Exception($"Aluno com o CPF {CPF} não encontrado.");
-            }
+            ValidaAlunoCPF(alunoExistente, CPF);
 
             foreach (var codigoTurma in CodigoTurmaInformado)
             {
@@ -86,18 +83,15 @@ namespace CursosDeIdiomasWebAPI.Repository
             return alunoExistente;
         }
 
-        public async Task<Aluno> Atualizar(Aluno aluno, string CPF)
+        public async Task<Aluno> Atualizar(string Nome, string CPF, string Email)
         {
             Aluno alunoEncontrado = await BuscarPorCPF(CPF);
 
-            if (alunoEncontrado == null)
-            {
-                throw new Exception($"Aluno para o CPF: {CPF} não foi encontrado no banco de dados.");
-            }
+            ValidaAlunoCPF(alunoEncontrado, CPF);
 
-            alunoEncontrado.Nome = aluno.Nome;
-            alunoEncontrado.CPF = aluno.CPF;
-            alunoEncontrado.Email = aluno.Email;
+            alunoEncontrado.Nome = Nome;
+            alunoEncontrado.CPF = CPF;
+            alunoEncontrado.Email = Email;
 
             _dbContext.Alunos.Update(alunoEncontrado);
             await _dbContext.SaveChangesAsync();
@@ -108,16 +102,21 @@ namespace CursosDeIdiomasWebAPI.Repository
         public async Task<Aluno> Apagar(string CPF)
         {
             Aluno alunoEncontrado = await BuscarPorCPF(CPF);
-    
-            if (alunoEncontrado == null)
-            {
-                throw new Exception($"Aluno para o CPF: {CPF} não foi encontrado no banco de dados.");
-            }
+
+            ValidaAlunoCPF(alunoEncontrado, CPF);
 
             _dbContext.Alunos.Remove(alunoEncontrado);
             await _dbContext.SaveChangesAsync();
 
             return alunoEncontrado;
+        }
+
+        public void ValidaAlunoCPF(Aluno alunoInformado, string CPF)
+        {
+            if (alunoInformado == null)
+            {
+                throw new Exception($"Aluno para o CPF: {CPF} não foi encontrado no banco de dados.");
+            }
         }
 
         public void ValidaQuantidadeAlunosEmTurma(Turma turmaInformada, string codigoTurma)

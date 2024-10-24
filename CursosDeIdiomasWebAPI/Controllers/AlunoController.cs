@@ -54,9 +54,9 @@ namespace CursosDeIdiomasWebAPI.Controllers
         }
 
         [HttpPut("{CPF}")]
-        public async Task<ActionResult<Aluno>> Atualizar([FromBody] Aluno aluno, string CPF)
+        public async Task<ActionResult<Aluno>> Atualizar(string Nome, string CPF, string Email)
         {
-            return Ok(await _alunoRepository.Atualizar(aluno, aluno.CPF = CPF));
+            return Ok(await _alunoRepository.Atualizar(Nome, CPF, Email));
         }
 
         [HttpDelete("{CPF}")]
