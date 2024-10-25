@@ -14,41 +14,48 @@ namespace CursosDeIdiomasWebAPI.Repository
             _dbContext = cursoDeIdiomasDbContext;
         }
 
-        public async Task<Turma> BuscarPorCodigo(string Codigo)
+        public async Task<Turma> BuscarPorCodigo(string codigo)
         {
-            return await _dbContext.Turmas.Include(x => x.listAlunos).FirstOrDefaultAsync(x => x.Codigo == Codigo);
+            return await _dbContext.Turmas.Include(x => x.listAlunos).FirstOrDefaultAsync(x => x.Codigo == codigo);
         }
 
-        public async Task<List<Turma>> BuscarTodasTurmas()
+        public async Task<Turma> BuscarPorNivel(string nivel)
+        {
+            return await _dbContext.Turmas.Include(x => x.listAlunos).FirstOrDefaultAsync(x => x.Nivel == nivel);
+        }
+
+        public async Task<List<Turma>> BuscarTodasAsTurmas()
         {
             return await _dbContext.Turmas.Include(x => x.listAlunos).ToListAsync();
         }
 
         public async Task<Turma> Adicionar(Turma turma)
         {
+            turma.listAlunos = null;
+
             await _dbContext.Turmas.AddAsync(turma);
             await _dbContext.SaveChangesAsync();
 
             return turma;
         }
 
-        public async Task<Turma> Apagar(string Codigo)
+        public async Task<Turma> Apagar(string codigo)
         {
-            Turma turmaPorCodigo = await BuscarPorCodigo(Codigo);
+            Turma turmaEncontrada = await BuscarPorCodigo(codigo);
 
-            if (turmaPorCodigo == null)
+            if (turmaEncontrada == null)
             {
-                throw new Exception($"Turma para o Código: {Codigo} não foi encontrado no banco de dados.");
+                throw new Exception($"Turma para o Código: {codigo} não foi encontrado no banco de dados.");
             }
-            else if (turmaPorCodigo.listAlunos.Count >= 1)
+            if (turmaEncontrada.listAlunos.Count >= 1)
             {
-                throw new Exception($"Existe alunos na Turma: {turmaPorCodigo.Codigo} e não pode ser apagada do banco de dados.");
+                throw new Exception($"Existe alunos na Turma: {turmaEncontrada.Codigo} e não pode ser apagada do banco de dados.");
             }
 
-            _dbContext.Turmas.Remove(turmaPorCodigo);
+            _dbContext.Turmas.Remove(turmaEncontrada);
             await _dbContext.SaveChangesAsync();
 
-            return turmaPorCodigo;
+            return turmaEncontrada;
         }
     }
 }

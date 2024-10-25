@@ -18,40 +18,46 @@ namespace CursosDeIdiomasWebAPI.Controllers
             _alunoRepository = alunoRepository;
         }
 
-        [HttpGet]
+        [HttpGet("Listar todos")]
         public async Task<ActionResult<List<Aluno>>> BuscarTodosAlunos()
         {
-            return Ok(await _alunoRepository.BuscarTodosAlunos());
+            return Ok(await _alunoRepository.BuscarTodosOsAlunos());
         }
 
-        [HttpPost("{CodigoTurma}")]
-        public async Task<ActionResult<Aluno>> Cadastrar(string CodigoTurma, [FromBody] Aluno aluno)
+        [HttpPost("Cadastro")]
+        public async Task<ActionResult<Aluno>> Cadastrar(string codigoTurma, [FromBody] Aluno aluno)
         {
-            return Ok(await _alunoRepository.Adicionar(CodigoTurma, aluno));
+            return Ok(await _alunoRepository.Adicionar(codigoTurma, aluno));
         }
 
-        [HttpPost("{CPF}/{CodigoTurma}")]
-        public async Task<ActionResult<Aluno>> CadastrarAlunoTurma(string CPF, string CodigoTurma)
+        [HttpPost("Cadastrar aluno em turma")]
+        public async Task<ActionResult<Aluno>> CadastrarAlunoTurma(string cpf, string codigoTurma)
         {
-            return Ok(await _alunoRepository.AdicionarAlunoTurma(CPF, CodigoTurma));
+            return Ok(await _alunoRepository.AdicionarAlunoTurma(cpf, codigoTurma));
         }
 
-        [HttpGet("{CPF}")]
-        public async Task<ActionResult<Aluno>> BuscarPorCPF(string CPF)
+        [HttpGet("Buscar por CPF")]
+        public async Task<ActionResult<Aluno>> BuscarPorCPF(string cpf)
         {
-            return Ok(await _alunoRepository.BuscarPorCPF(CPF));
+            return Ok(await _alunoRepository.BuscarPorCPF(cpf));
         }
 
-        [HttpPut("{CPF}")]
-        public async Task<ActionResult<Aluno>> Atualizar(string Nome, string CPF, string Email)
+        [HttpGet("Buscar por Nome")]
+        public async Task<ActionResult<Aluno>> BuscarPorNome(string nome)
         {
-            return Ok(await _alunoRepository.Atualizar(Nome, CPF, Email));
+            return Ok(await _alunoRepository.BuscarPorNome(nome));
         }
 
-        [HttpDelete("{CPF}")]
-        public async Task<ActionResult<Aluno>> Apagar(string CPF)
+        [HttpPut("Editar")]
+        public async Task<ActionResult<Aluno>> Atualizar(string cpf, string nome, string email)
         {
-            return Ok(await _alunoRepository.Apagar(CPF));
+            return Ok(await _alunoRepository.Atualizar(nome, cpf, email));
+        }
+
+        [HttpDelete("Apagar")]
+        public async Task<ActionResult<Aluno>> Apagar(string cpf)
+        {
+            return Ok(await _alunoRepository.Apagar(cpf));
         }
     }
 }

@@ -4,9 +4,10 @@ namespace CursosDeIdiomasWebAPI.Repository.Interfaces
 {
     public interface ITurmaRepository
     {
-        Task<List<Turma>> BuscarTodasTurmas();
-        Task<Turma> BuscarPorCodigo(string Codigo);
+        Task<List<Turma>> BuscarTodasAsTurmas();
+        Task<Turma> BuscarPorCodigo(string codigo);
+        Task<Turma> BuscarPorNivel(string nivel);
         Task<Turma> Adicionar(Turma turma);
-        Task<Turma> Apagar(string Codigo);
+        Task<Turma> Apagar(string codigo);
     }
 }

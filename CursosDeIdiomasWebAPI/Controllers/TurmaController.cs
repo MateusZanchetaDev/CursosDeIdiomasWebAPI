@@ -17,28 +17,34 @@ namespace CursosDeIdiomasWebAPI.Controllers
             _turmaRepository = turmaRepository;
         }
 
-        [HttpGet]
+        [HttpGet("Listar todas")]
         public async Task<ActionResult<List<Turma>>> BuscarTodasTurmas()
         {
-            return Ok(await _turmaRepository.BuscarTodasTurmas());
+            return Ok(await _turmaRepository.BuscarTodasAsTurmas());
         }
 
-        [HttpGet("{Codigo}")]
-        public async Task<ActionResult<Turma>> BuscarPorCodigo(string Codigo)
-        {
-            return Ok(await _turmaRepository.BuscarPorCodigo(Codigo));
-        }
-
-        [HttpPost]
+        [HttpPost("Cadastrar")]
         public async Task<ActionResult<Turma>> Cadastrar([FromBody] Turma turma)
         {
             return Ok(await _turmaRepository.Adicionar(turma));
         }
 
-        [HttpDelete("{Codigo}")]
-        public async Task<ActionResult<Turma>> Apagar(string Codigo)
+        [HttpGet("Buscar por Codigo")]
+        public async Task<ActionResult<Turma>> BuscarPorCodigo(string codigo)
         {
-            return Ok(await _turmaRepository.Apagar(Codigo));
+            return Ok(await _turmaRepository.BuscarPorCodigo(codigo));
+        }
+
+        [HttpGet("Buscar por Nível")]
+        public async Task<ActionResult<Turma>> BuscarPorNivel(string nivel)
+        {
+            return Ok(await _turmaRepository.BuscarPorNivel(nivel));
+        }
+
+        [HttpDelete("Apagar")]
+        public async Task<ActionResult<Turma>> Apagar(string codigo)
+        {
+            return Ok(await _turmaRepository.Apagar(codigo));
         }
     }
 }

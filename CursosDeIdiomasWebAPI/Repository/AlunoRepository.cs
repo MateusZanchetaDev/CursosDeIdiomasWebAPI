@@ -13,32 +13,38 @@ namespace CursosDeIdiomasWebAPI.Repository
             _dbContext = cursoDeIdiomasDbContext;
         }
 
-        public async Task<Aluno> BuscarPorCPF(string CPF)
+        public async Task<Aluno> BuscarPorCPF(string cpf)
         {
-            return await _dbContext.Alunos.Include(a => a.listTurmas).FirstOrDefaultAsync(a => a.CPF == CPF);
+            return await _dbContext.Alunos.Include(a => a.listTurmas).FirstOrDefaultAsync(a => a.CPF == cpf) ?? 
+                throw new Exception($"Aluno para o CPF: {cpf} não foi encontrado no banco de dados.");
         }
 
-        public async Task<Turma> BuscarTurma(string CodigoTurma)
+        public async Task<List<Aluno>> BuscarPorNome(string nome)
         {
-            return await _dbContext.Turmas.Include(t => t.listAlunos).FirstOrDefaultAsync(t => t.Codigo == CodigoTurma);
+            return await _dbContext.Alunos.Include(a => a.listTurmas).Where(a => a.Nome == nome).ToListAsync();
         }
 
-        public async Task<List<Aluno>> BuscarTodosAlunos()
+        public async Task<Turma> BuscarPorCodigoTurma(string codigo)
+        {
+            return await _dbContext.Turmas.Include(t => t.listAlunos).FirstOrDefaultAsync(t => t.Codigo == codigo);
+        }
+
+        public async Task<List<Aluno>> BuscarTodosOsAlunos()
         {
             return await _dbContext.Alunos.ToListAsync();
         }
 
-        public async Task<Aluno> Adicionar(string CodigoTurma, Aluno aluno)
+        public async Task<Aluno> Adicionar(string codigoTurma, Aluno aluno)
         {
-            Aluno encontrarAluno = await BuscarPorCPF(aluno.CPF);
-            Turma turmaEncontrada = await BuscarTurma(CodigoTurma);
+            Aluno alunoEncontrado = await BuscarPorCPF(aluno.CPF);
+            Turma turmaEncontrada = await BuscarPorCodigoTurma(codigoTurma);
 
-            if (encontrarAluno != null)
+            if (alunoEncontrado != null)
             {
                 throw new Exception($"O Aluno do CPF: {aluno.CPF} já existe no banco de dados.");
             }
 
-            ValidaTurmaExistente_QuantidadeAlunosEmTurma(turmaEncontrada, CodigoTurma);
+            ValidaTurmaExistente_QuantidadeAlunosEmTurma(turmaEncontrada, codigoTurma);
 
             aluno.listTurmas = new List<Turma> { turmaEncontrada };
             aluno.listTurmas.AddRange(aluno.listTurmas);
@@ -49,37 +55,21 @@ namespace CursosDeIdiomasWebAPI.Repository
             return aluno;
         }
 
-        public async Task<Aluno> AdicionarAlunoTurma(string CPF, string CodigoTurma)
+        public async Task<Aluno> AdicionarAlunoTurma(string cpf, string codigoTurma)
         {
-            Aluno alunoExistente = await BuscarPorCPF(CPF);
-            Turma turmaEncontrada = await BuscarTurma(CodigoTurma);
+            Aluno alunoEncontrado = await BuscarPorCPF(cpf);
+            Turma turmaEncontrada = await BuscarPorCodigoTurma(codigoTurma);
 
-            ValidaAlunoCPF(alunoExistente, CPF);
+            ValidaAlunoCPF(alunoEncontrado, cpf);
 
-            ValidaTurmaExistente_QuantidadeAlunosEmTurma(turmaEncontrada, CodigoTurma);
+            ValidaTurmaExistente_QuantidadeAlunosEmTurma(turmaEncontrada, codigoTurma);
 
-            if (alunoExistente.listTurmas.Any(t => t.Codigo == CodigoTurma))
+            if (alunoEncontrado.listTurmas.Any(t => t.Codigo == codigoTurma))
             {
-                throw new Exception($"O aluno: {alunoExistente.CPF}, já está na turma: {CodigoTurma}.");
+                throw new Exception($"O aluno: {alunoEncontrado.CPF}, já está na turma: {codigoTurma}.");
             }
 
-            alunoExistente.listTurmas.Add(turmaEncontrada);
-
-            _dbContext.Alunos.Update(alunoExistente);
-            await _dbContext.SaveChangesAsync();
-
-            return alunoExistente;
-        }
-
-        public async Task<Aluno> Atualizar(string Nome, string CPF, string Email)
-        {
-            Aluno alunoEncontrado = await BuscarPorCPF(CPF);
-
-            ValidaAlunoCPF(alunoEncontrado, CPF);
-
-            alunoEncontrado.Nome = Nome;
-            alunoEncontrado.CPF = CPF;
-            alunoEncontrado.Email = Email;
+            alunoEncontrado.listTurmas.Add(turmaEncontrada);
 
             _dbContext.Alunos.Update(alunoEncontrado);
             await _dbContext.SaveChangesAsync();
@@ -87,11 +77,27 @@ namespace CursosDeIdiomasWebAPI.Repository
             return alunoEncontrado;
         }
 
-        public async Task<Aluno> Apagar(string CPF)
+        public async Task<Aluno> Atualizar(string nome, string cpf, string email)
         {
-            Aluno alunoEncontrado = await BuscarPorCPF(CPF);
+            Aluno alunoEncontrado = await BuscarPorCPF(cpf);
 
-            ValidaAlunoCPF(alunoEncontrado, CPF);
+            ValidaAlunoCPF(alunoEncontrado, cpf);
+
+            alunoEncontrado.Nome = nome;
+            alunoEncontrado.CPF = cpf;
+            alunoEncontrado.Email = email;
+
+            _dbContext.Alunos.Update(alunoEncontrado);
+            await _dbContext.SaveChangesAsync();
+
+            return alunoEncontrado;
+        }
+
+        public async Task<Aluno> Apagar(string cpf)
+        {
+            Aluno alunoEncontrado = await BuscarPorCPF(cpf);
+
+            ValidaAlunoCPF(alunoEncontrado, cpf);
 
             _dbContext.Alunos.Remove(alunoEncontrado);
             await _dbContext.SaveChangesAsync();
@@ -99,24 +105,24 @@ namespace CursosDeIdiomasWebAPI.Repository
             return alunoEncontrado;
         }
 
-        public void ValidaAlunoCPF(Aluno alunoInformado, string CPF)
+        public void ValidaAlunoCPF(Aluno aluno, string cpf)
         {
-            if (alunoInformado == null)
+            if (aluno == null)
             {
-                throw new Exception($"Aluno para o CPF: {CPF} não foi encontrado no banco de dados.");
+                throw new Exception($"Aluno para o CPF: {cpf} não foi encontrado no banco de dados.");
             }
         }
 
-        public void ValidaTurmaExistente_QuantidadeAlunosEmTurma(Turma turmaInformada, string codigoTurma)
+        public void ValidaTurmaExistente_QuantidadeAlunosEmTurma(Turma turma, string codigo)
         {
-            if (turmaInformada == null)
+            if (turma == null)
             {
-                throw new Exception($"A turma com Código: {codigoTurma} não foi encontrada.");
+                throw new Exception($"A turma com Código: {codigo} não foi encontrada.");
             }
 
-            if (turmaInformada.listAlunos.Count >= 5)
+            if (turma.listAlunos.Count >= 5)
             {
-                throw new Exception($"A turma {codigoTurma} só pode ter no máximo 5 alunos. Quantidade atual: {turmaInformada.listAlunos.Count}.");
+                throw new Exception($"A turma {codigo} só pode ter no máximo 5 alunos. Quantidade atual: {turma.listAlunos.Count}.");
             }
         }
     }
